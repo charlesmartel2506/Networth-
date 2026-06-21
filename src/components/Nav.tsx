@@ -3,6 +3,7 @@ import { signOut } from "@/app/login/actions";
 
 const links = [
   { href: "/dashboard", label: "Dashboard", icon: "📊" },
+  { href: "/investments", label: "Investments", icon: "📈" },
   { href: "/expenses", label: "Expenses", icon: "💸" },
   { href: "/forecast", label: "Forecast", icon: "🔮" },
   { href: "/ranks", label: "Ranks", icon: "🏅" },

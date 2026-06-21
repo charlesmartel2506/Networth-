@@ -37,6 +37,7 @@ export async function updateSession(request: NextRequest) {
     "/expenses",
     "/forecast",
     "/ranks",
+    "/investments",
   ].some((p) => path.startsWith(p));
 
   if (!user && isProtected) {

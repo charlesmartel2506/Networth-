@@ -17,7 +17,22 @@ export const RANKS: Rank[] = [
   { name: "Master", emoji: "👑", color: "#a855f7", min: 10000, max: 25000 },
   { name: "Grandmaster", emoji: "🔱", color: "#8b5cf6", min: 25000, max: 50000 },
   { name: "Legend", emoji: "🏆", color: "#f43f5e", min: 50000, max: 100000 },
-  { name: "Mythic", emoji: "🌟", color: "#fbbf24", min: 100000, max: Infinity },
+  { name: "Mythic", emoji: "🌟", color: "#fbbf24", min: 100000, max: 1000000 },
+  { name: "Titan", emoji: "🛡️", color: "#ec4899", min: 1000000, max: 10000000 },
+  {
+    name: "Celestial",
+    emoji: "🌌",
+    color: "#2dd4bf",
+    min: 10000000,
+    max: 100000000,
+  },
+  {
+    name: "Immortal",
+    emoji: "♾️",
+    color: "#f97316",
+    min: 100000000,
+    max: 1000000000,
+  },
 ];
 
 export function getRank(amount: number): Rank {
