@@ -6,13 +6,13 @@ import { formatMoney, formatDate } from "@/lib/format";
 import { addExpense, deleteExpense } from "./actions";
 
 const CATEGORIES: { name: string; color: string }[] = [
-  { name: "Logement", color: "#6d5efc" },
-  { name: "Nourriture", color: "#10b981" },
+  { name: "Housing", color: "#6d5efc" },
+  { name: "Food", color: "#10b981" },
   { name: "Transport", color: "#f59e0b" },
-  { name: "Loisirs", color: "#a855f7" },
-  { name: "Factures", color: "#38bdf8" },
-  { name: "Santé", color: "#f43f5e" },
-  { name: "Autre", color: "#9aa3b2" },
+  { name: "Leisure", color: "#a855f7" },
+  { name: "Bills", color: "#38bdf8" },
+  { name: "Health", color: "#f43f5e" },
+  { name: "Other", color: "#9aa3b2" },
 ];
 
 function colorFor(cat: string): string {
@@ -40,10 +40,10 @@ export default async function ExpensesPage() {
 
   const total = expenses.reduce((s, e) => s + parseFloat(e.amount), 0);
 
-  // Total par catégorie pour le graphique
+  // Total per category for the chart
   const byCat = new Map<string, number>();
   for (const e of expenses) {
-    const c = e.category || "Autre";
+    const c = e.category || "Other";
     byCat.set(c, (byCat.get(c) ?? 0) + parseFloat(e.amount));
   }
   const chartData = Array.from(byCat.entries())
@@ -57,27 +57,27 @@ export default async function ExpensesPage() {
       <Nav displayName={nw.displayName} />
       <main className="flex-1 max-w-5xl w-full mx-auto px-4 sm:px-6 py-8 flex flex-col gap-6">
         <div className="flex flex-col gap-1">
-          <h1 className="text-2xl font-bold">Dépenses 💸</h1>
+          <h1 className="text-2xl font-bold">Expenses 💸</h1>
           <p className="text-sm text-muted">
-            Tes dépenses se soustraient de ta valeur nette estimée.
+            Your expenses are subtracted from your estimated net worth.
           </p>
         </div>
 
         <section className="grid sm:grid-cols-3 gap-4">
           <div className="card p-5 flex flex-col gap-1">
-            <span className="text-sm text-muted">Total des dépenses</span>
+            <span className="text-sm text-muted">Total expenses</span>
             <span className="text-2xl font-bold tabular-nums text-negative">
               −{formatMoney(total)}
             </span>
           </div>
           <div className="card p-5 flex flex-col gap-1">
-            <span className="text-sm text-muted">Dernière valeur nette</span>
+            <span className="text-sm text-muted">Last net worth</span>
             <span className="text-2xl font-bold tabular-nums">
               {formatMoney(nw.snapshot)}
             </span>
           </div>
           <div className="card p-5 flex flex-col gap-1">
-            <span className="text-sm text-muted">Valeur nette estimée</span>
+            <span className="text-sm text-muted">Estimated net worth</span>
             <span className="text-2xl font-bold tabular-nums text-primary">
               {formatMoney(nw.estimated)}
             </span>
@@ -85,12 +85,12 @@ export default async function ExpensesPage() {
         </section>
 
         <div className="grid md:grid-cols-2 gap-6">
-          {/* Ajouter une dépense */}
+          {/* Add an expense */}
           <section className="card p-5 flex flex-col gap-3">
-            <h2 className="font-semibold">Ajouter une dépense</h2>
+            <h2 className="font-semibold">Add an expense</h2>
             <form action={addExpense} className="flex flex-col gap-3">
               <label className="flex flex-col gap-1 text-sm">
-                Montant
+                Amount
                 <input
                   name="amount"
                   type="number"
@@ -103,8 +103,8 @@ export default async function ExpensesPage() {
               </label>
               <div className="grid grid-cols-2 gap-3">
                 <label className="flex flex-col gap-1 text-sm">
-                  Catégorie
-                  <select name="category" className="input" defaultValue="Autre">
+                  Category
+                  <select name="category" className="input" defaultValue="Other">
                     {CATEGORIES.map((c) => (
                       <option key={c.name} value={c.name}>
                         {c.name}
@@ -127,41 +127,41 @@ export default async function ExpensesPage() {
                 <input
                   name="note"
                   type="text"
-                  placeholder="Optionnel (ex: épicerie)"
+                  placeholder="Optional (e.g. groceries)"
                   className="input"
                 />
               </label>
-              <button className="btn-primary mt-1">Ajouter la dépense</button>
+              <button className="btn-primary mt-1">Add expense</button>
             </form>
           </section>
 
-          {/* Graphique par catégorie */}
+          {/* Chart by category */}
           <section className="card p-5 flex flex-col gap-3">
-            <h2 className="font-semibold">Par catégorie</h2>
+            <h2 className="font-semibold">By category</h2>
             {chartData.length > 0 ? (
               <ExpensesBarChart data={chartData} />
             ) : (
               <p className="text-sm text-muted py-12 text-center">
-                Ajoute une dépense pour voir la répartition.
+                Add an expense to see the breakdown.
               </p>
             )}
           </section>
         </div>
 
-        {/* Liste */}
+        {/* List */}
         <section className="card p-5 flex flex-col gap-3">
-          <h2 className="font-semibold">Historique des dépenses</h2>
+          <h2 className="font-semibold">Expense history</h2>
           {expenses.length === 0 ? (
-            <p className="text-sm text-muted">Aucune dépense pour l&apos;instant.</p>
+            <p className="text-sm text-muted">No expenses yet.</p>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead className="text-left text-muted">
                   <tr>
                     <th className="px-3 py-2 font-medium">Date</th>
-                    <th className="px-3 py-2 font-medium">Catégorie</th>
+                    <th className="px-3 py-2 font-medium">Category</th>
                     <th className="px-3 py-2 font-medium">Note</th>
-                    <th className="px-3 py-2 font-medium text-right">Montant</th>
+                    <th className="px-3 py-2 font-medium text-right">Amount</th>
                     <th className="px-3 py-2"></th>
                   </tr>
                 </thead>
@@ -173,11 +173,11 @@ export default async function ExpensesPage() {
                         <span
                           className="inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-xs font-medium"
                           style={{
-                            background: `${colorFor(e.category || "Autre")}22`,
-                            color: colorFor(e.category || "Autre"),
+                            background: `${colorFor(e.category || "Other")}22`,
+                            color: colorFor(e.category || "Other"),
                           }}
                         >
-                          {e.category || "Autre"}
+                          {e.category || "Other"}
                         </span>
                       </td>
                       <td className="px-3 py-2 text-muted">{e.note || "—"}</td>
@@ -189,7 +189,7 @@ export default async function ExpensesPage() {
                           <input type="hidden" name="id" value={e.id} />
                           <button
                             className="text-muted hover:text-negative transition"
-                            title="Supprimer"
+                            title="Delete"
                           >
                             ✕
                           </button>

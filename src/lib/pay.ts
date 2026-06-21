@@ -47,7 +47,7 @@ export function buildForecast(
   const points: ForecastPoint[] = [
     {
       date: iso(today),
-      label: "Aujourd'hui",
+      label: "Today",
       value: Math.round(startValue),
       paycheck: false,
     },
@@ -63,7 +63,7 @@ export function buildForecast(
     value += pay - dailyExpense * Math.max(0, daysSpan);
     points.push({
       date: iso(payday),
-      label: new Intl.DateTimeFormat("fr-CA", {
+      label: new Intl.DateTimeFormat("en-CA", {
         month: "short",
         day: "numeric",
       }).format(payday),

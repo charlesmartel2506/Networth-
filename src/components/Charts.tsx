@@ -14,7 +14,7 @@ import {
 } from "recharts";
 
 const fmt = (n: number) =>
-  new Intl.NumberFormat("fr-CA", {
+  new Intl.NumberFormat("en-CA", {
     style: "currency",
     currency: "CAD",
     maximumFractionDigits: 0,
@@ -54,7 +54,7 @@ export function NetWorthAreaChart({
             width={70}
           />
           <Tooltip
-            formatter={(v) => [fmt(Number(v)), "Valeur nette"]}
+            formatter={(v) => [fmt(Number(v)), "Net worth"]}
             contentStyle={{
               borderRadius: 12,
               border: "1px solid rgba(128,128,128,0.2)",
@@ -99,7 +99,7 @@ export function ExpensesBarChart({
             width={70}
           />
           <Tooltip
-            formatter={(v) => [fmt(Number(v)), "Dépenses"]}
+            formatter={(v) => [fmt(Number(v)), "Expenses"]}
             cursor={{ fill: "rgba(128,128,128,0.08)" }}
             contentStyle={{
               borderRadius: 12,

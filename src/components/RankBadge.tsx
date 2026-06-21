@@ -36,11 +36,11 @@ export default function RankBadge({
         </span>
         <div>
           <div className="font-bold" style={{ color: rank.color }}>
-            Rang {rank.name}
+            {rank.name} rank
           </div>
           {next && (
             <div className="text-xs text-muted">
-              Encore {formatMoney(toNext)} jusqu&apos;à {next.emoji} {next.name}
+              {formatMoney(toNext)} to go until {next.emoji} {next.name}
             </div>
           )}
         </div>

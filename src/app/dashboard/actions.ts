@@ -2,22 +2,38 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
+import { ASSET_CATEGORIES, LIABILITY_CATEGORIES } from "@/lib/categories";
 
 async function requireUser() {
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) throw new Error("Non authentifié");
+  if (!user) throw new Error("Not authenticated");
   return { supabase, user };
 }
 
 export async function addEntry(formData: FormData) {
   const { supabase, user } = await requireUser();
 
-  const assets = parseFloat(String(formData.get("assets") || "0")) || 0;
-  const liabilities =
-    parseFloat(String(formData.get("liabilities") || "0")) || 0;
+  // Additionne chaque catégorie et construit le détail (breakdown).
+  let assets = 0;
+  const asset_breakdown: Record<string, number> = {};
+  for (const c of ASSET_CATEGORIES) {
+    const v = parseFloat(String(formData.get(`asset_${c.key}`) || "0")) || 0;
+    if (v) asset_breakdown[c.key] = v;
+    assets += v;
+  }
+
+  let liabilities = 0;
+  const liability_breakdown: Record<string, number> = {};
+  for (const c of LIABILITY_CATEGORIES) {
+    const v =
+      parseFloat(String(formData.get(`liability_${c.key}`) || "0")) || 0;
+    if (v) liability_breakdown[c.key] = v;
+    liabilities += v;
+  }
+
   const note = String(formData.get("note") || "").trim() || null;
   const recorded_at =
     String(formData.get("recorded_at") || "") ||
@@ -27,6 +43,8 @@ export async function addEntry(formData: FormData) {
     user_id: user.id,
     assets,
     liabilities,
+    asset_breakdown,
+    liability_breakdown,
     note,
     recorded_at,
   });
@@ -40,7 +58,7 @@ export async function createGroup(formData: FormData) {
   const { supabase, user } = await requireUser();
 
   const name = String(formData.get("name") || "").trim();
-  if (!name) throw new Error("Nom de groupe requis");
+  if (!name) throw new Error("Group name required");
 
   const { data: group, error } = await supabase
     .from("groups")
@@ -64,7 +82,7 @@ export async function joinGroup(formData: FormData) {
   const { supabase } = await requireUser();
 
   const code = String(formData.get("code") || "").trim();
-  if (!code) throw new Error("Code requis");
+  if (!code) throw new Error("Code required");
 
   const { error } = await supabase.rpc("join_group_by_code", { code });
   if (error) throw new Error(error.message);

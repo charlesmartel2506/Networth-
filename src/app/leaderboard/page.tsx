@@ -39,7 +39,10 @@ export default async function LeaderboardPage() {
     .in("user_id", userIds.length ? userIds : ["00000000-0000-0000-0000-000000000000"]);
 
   const nameById = new Map(
-    (profiles ?? []).map((p) => [p.id, p.display_name || p.username || "Anonyme"]),
+    (profiles ?? []).map((p) => [
+      p.id,
+      p.display_name || p.username || "Anonymous",
+    ]),
   );
   const amountById = new Map(
     (nws ?? []).map((n) => [n.user_id, parseFloat(n.amount)]),
@@ -51,16 +54,16 @@ export default async function LeaderboardPage() {
     <>
       <Nav displayName={profile?.display_name} />
       <main className="flex-1 max-w-4xl w-full mx-auto px-6 py-8 flex flex-col gap-8">
-        <h1 className="text-2xl font-bold">Classement 🏆</h1>
+        <h1 className="text-2xl font-bold">Leaderboard 🏆</h1>
 
         {(groups ?? []).length === 0 ? (
           <div className="card p-6 text-sm text-muted">
-            Tu ne fais partie d&apos;aucun groupe pour l&apos;instant. Crée ou
-            rejoins un groupe depuis ton{" "}
+            You&apos;re not part of any group yet. Create or join a group from
+            your{" "}
             <Link href="/dashboard" className="underline">
-              tableau de bord
+              dashboard
             </Link>{" "}
-            pour te comparer à tes amis.
+            to compare with your friends.
           </div>
         ) : (
           (groups ?? []).map((group) => {
@@ -68,7 +71,7 @@ export default async function LeaderboardPage() {
               .filter((m) => m.group_id === group.id)
               .map((m) => ({
                 userId: m.user_id,
-                name: nameById.get(m.user_id) ?? "Anonyme",
+                name: nameById.get(m.user_id) ?? "Anonymous",
                 amount: amountById.get(m.user_id) ?? null,
               }))
               .sort((a, b) => (b.amount ?? -Infinity) - (a.amount ?? -Infinity));
@@ -91,7 +94,7 @@ export default async function LeaderboardPage() {
                         <span className="font-medium">
                           {row.name}
                           {row.userId === user!.id && (
-                            <span className="text-muted"> (toi)</span>
+                            <span className="text-muted"> (you)</span>
                           )}
                         </span>
                         {row.amount !== null && (

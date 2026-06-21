@@ -37,7 +37,7 @@ export default async function RanksPage() {
   const friends = (profiles ?? [])
     .map((p) => ({
       id: p.id,
-      name: p.display_name || p.username || "Anonyme",
+      name: p.display_name || p.username || "Anonymous",
       amount: amountById.get(p.id) ?? 0,
     }))
     .sort((a, b) => b.amount - a.amount);
@@ -50,20 +50,20 @@ export default async function RanksPage() {
       <Nav displayName={nw.displayName} />
       <main className="flex-1 max-w-5xl w-full mx-auto px-4 sm:px-6 py-8 flex flex-col gap-6">
         <div className="flex flex-col gap-1">
-          <h1 className="text-2xl font-bold">Rangs 🏅</h1>
+          <h1 className="text-2xl font-bold">Ranks 🏅</h1>
           <p className="text-sm text-muted">
-            Grimpe les paliers en augmentant ta valeur nette.
+            Climb the tiers by growing your net worth.
           </p>
         </div>
 
-        {/* Mon rang */}
+        {/* My rank */}
         <section
           className="card p-6 text-white"
           style={{
             background: `linear-gradient(135deg, ${myRank.color}, var(--primary-2))`,
           }}
         >
-          <span className="text-sm opacity-90">Ton rang actuel</span>
+          <span className="text-sm opacity-90">Your current rank</span>
           <div className="flex items-center justify-between gap-4 mt-1">
             <div className="text-3xl font-bold">
               {myRank.emoji} {myRank.name}
@@ -76,7 +76,7 @@ export default async function RanksPage() {
 
         {/* Échelle des rangs */}
         <section className="card p-5 flex flex-col gap-2">
-          <h2 className="font-semibold mb-1">L&apos;échelle des rangs</h2>
+          <h2 className="font-semibold mb-1">The rank ladder</h2>
           {RANKS.filter((r) => Number.isFinite(r.max) || r.min >= 0).map((r) => {
             const isCurrent = r.name === myRank.name;
             return (
@@ -98,12 +98,12 @@ export default async function RanksPage() {
                   <div className="font-semibold" style={{ color: r.color }}>
                     {r.name}
                     {isCurrent && (
-                      <span className="ml-2 text-xs text-muted">(toi)</span>
+                      <span className="ml-2 text-xs text-muted">(you)</span>
                     )}
                   </div>
                   <div className="text-xs text-muted tabular-nums">
                     {r.min < 0
-                      ? "En dessous de 0 $"
+                      ? "Below $0"
                       : `${formatMoney(r.min)} – ${displayMax(r.max) === "∞" ? "∞" : formatMoney(r.max)}`}
                   </div>
                 </div>
@@ -115,7 +115,7 @@ export default async function RanksPage() {
         {/* Rangs des amis */}
         {friends.length > 1 && (
           <section className="card p-5 flex flex-col gap-3">
-            <h2 className="font-semibold">Rangs de tes amis</h2>
+            <h2 className="font-semibold">Your friends&apos; ranks</h2>
             <div className="flex flex-col gap-2">
               {friends.map((f) => (
                 <div
@@ -125,7 +125,7 @@ export default async function RanksPage() {
                   <span className="font-medium">
                     {f.name}
                     {f.id === nw.userId && (
-                      <span className="text-muted"> (toi)</span>
+                      <span className="text-muted"> (you)</span>
                     )}
                   </span>
                   <RankBadge amount={f.amount} size="sm" />

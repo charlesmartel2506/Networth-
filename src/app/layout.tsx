@@ -13,9 +13,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Networth — Suis et compare ta valeur nette",
+  title: "Networth — Track and compare your net worth",
   description:
-    "Suis ta valeur nette, compare-toi à tes amis et améliore tes finances.",
+    "Track your net worth, compare with friends, and improve your finances.",
 };
 
 export default function RootLayout({
@@ -25,7 +25,7 @@ export default function RootLayout({
 }>) {
   return (
     <html
-      lang="fr"
+      lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">{children}</body>

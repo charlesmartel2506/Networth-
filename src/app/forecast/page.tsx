@@ -8,17 +8,17 @@ import { formatMoney, formatDate } from "@/lib/format";
 import { savePaySettings } from "./actions";
 
 const FREQUENCIES = [
-  { days: 7, label: "Chaque semaine" },
-  { days: 14, label: "Aux 2 semaines" },
-  { days: 15, label: "2 fois par mois" },
-  { days: 30, label: "Chaque mois" },
+  { days: 7, label: "Every week" },
+  { days: 14, label: "Every 2 weeks" },
+  { days: 15, label: "Twice a month" },
+  { days: 30, label: "Every month" },
 ];
 
 export default async function ForecastPage() {
   const supabase = await createClient();
   const nw = await getNetWorthData();
 
-  // Dépense quotidienne moyenne sur les 30 derniers jours
+  // Average daily spending over the last 30 days
   const since = new Date(Date.now() - 30 * 86400000).toISOString().slice(0, 10);
   const { data: recentExp } = await supabase
     .from("expenses")
@@ -52,21 +52,21 @@ export default async function ForecastPage() {
       <Nav displayName={nw.displayName} />
       <main className="flex-1 max-w-5xl w-full mx-auto px-4 sm:px-6 py-8 flex flex-col gap-6">
         <div className="flex flex-col gap-1">
-          <h1 className="text-2xl font-bold">Prévisions 🔮</h1>
+          <h1 className="text-2xl font-bold">Forecast 🔮</h1>
           <p className="text-sm text-muted">
-            Estime ta valeur nette future à partir de ton salaire et de tes
-            dépenses récentes.
+            Estimate your future net worth based on your salary and recent
+            spending.
           </p>
         </div>
 
         <div className="grid md:grid-cols-2 gap-6">
-          {/* Paramètres de paie */}
+          {/* Pay settings */}
           <section className="card p-5 flex flex-col gap-3">
-            <h2 className="font-semibold">Ton salaire</h2>
+            <h2 className="font-semibold">Your salary</h2>
             <form action={savePaySettings} className="flex flex-col gap-3">
               <div className="grid grid-cols-2 gap-3">
                 <label className="flex flex-col gap-1 text-sm">
-                  Taux horaire ($)
+                  Hourly rate ($)
                   <input
                     name="hourly_rate"
                     type="number"
@@ -78,7 +78,7 @@ export default async function ForecastPage() {
                   />
                 </label>
                 <label className="flex flex-col gap-1 text-sm">
-                  Heures par paie
+                  Hours per paycheck
                   <input
                     name="hours_per_paycheck"
                     type="number"
@@ -91,7 +91,7 @@ export default async function ForecastPage() {
                 </label>
               </div>
               <label className="flex flex-col gap-1 text-sm">
-                Fréquence de paie
+                Pay frequency
                 <select
                   name="frequency_days"
                   className="input"
@@ -105,7 +105,7 @@ export default async function ForecastPage() {
                 </select>
               </label>
               <label className="flex flex-col gap-1 text-sm">
-                Prochaine paie (ex: prochain vendredi)
+                Next payday (e.g. next Friday)
                 <input
                   name="next_payday"
                   type="date"
@@ -113,36 +113,34 @@ export default async function ForecastPage() {
                   className="input"
                 />
               </label>
-              <button className="btn-primary mt-1">Enregistrer</button>
+              <button className="btn-primary mt-1">Save</button>
             </form>
           </section>
 
-          {/* Résumé */}
+          {/* Summary */}
           <section className="card p-5 flex flex-col gap-4">
-            <h2 className="font-semibold">Résumé</h2>
+            <h2 className="font-semibold">Summary</h2>
             <div className="grid grid-cols-2 gap-4">
               <div className="flex flex-col gap-1">
-                <span className="text-sm text-muted">Par paie</span>
+                <span className="text-sm text-muted">Per paycheck</span>
                 <span className="text-xl font-bold tabular-nums text-positive">
                   +{formatMoney(paycheckAmount(pay))}
                 </span>
               </div>
               <div className="flex flex-col gap-1">
-                <span className="text-sm text-muted">Dépenses / jour</span>
+                <span className="text-sm text-muted">Spending / day</span>
                 <span className="text-xl font-bold tabular-nums text-negative">
                   −{formatMoney(dailyExpense)}
                 </span>
               </div>
               <div className="flex flex-col gap-1">
-                <span className="text-sm text-muted">Valeur nette actuelle</span>
+                <span className="text-sm text-muted">Current net worth</span>
                 <span className="text-xl font-bold tabular-nums">
                   {formatMoney(nw.estimated)}
                 </span>
               </div>
               <div className="flex flex-col gap-1">
-                <span className="text-sm text-muted">
-                  Dans {periods} paies
-                </span>
+                <span className="text-sm text-muted">In {periods} paychecks</span>
                 <span className="text-xl font-bold tabular-nums text-primary">
                   {formatMoney(finalValue)}
                 </span>
@@ -150,7 +148,7 @@ export default async function ForecastPage() {
             </div>
             {configured && (
               <div className="pt-2 border-t border-border">
-                <span className="text-sm text-muted">Rang projeté :</span>
+                <span className="text-sm text-muted">Projected rank:</span>
                 <div className="mt-2">
                   <RankBadge amount={finalValue} />
                 </div>
@@ -159,30 +157,30 @@ export default async function ForecastPage() {
           </section>
         </div>
 
-        {/* Graphique de prévision */}
+        {/* Forecast chart */}
         <section className="card p-5">
-          <h2 className="font-semibold mb-2">Projection de ta valeur nette</h2>
+          <h2 className="font-semibold mb-2">Net worth projection</h2>
           {configured ? (
             <NetWorthAreaChart data={chartData} color="#10b981" />
           ) : (
             <p className="text-sm text-muted py-12 text-center">
-              Renseigne ton taux horaire et tes heures par paie pour voir la
+              Enter your hourly rate and hours per paycheck to see the
               projection.
             </p>
           )}
         </section>
 
-        {/* Tableau des paies à venir */}
+        {/* Upcoming paydays table */}
         {configured && (
           <section className="card p-5 flex flex-col gap-3">
-            <h2 className="font-semibold">Paies à venir</h2>
+            <h2 className="font-semibold">Upcoming paydays</h2>
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead className="text-left text-muted">
                   <tr>
-                    <th className="px-3 py-2 font-medium">Date de paie</th>
+                    <th className="px-3 py-2 font-medium">Payday</th>
                     <th className="px-3 py-2 font-medium text-right">
-                      Valeur nette projetée
+                      Projected net worth
                     </th>
                   </tr>
                 </thead>

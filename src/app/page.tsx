@@ -18,11 +18,11 @@ export default async function Home() {
           <span className="gradient-text">Networth</span>
         </h1>
         <p className="text-lg text-muted">
-          Suis ta valeur nette, grimpe les rangs, compare-toi à tes amis et
-          projette tes finances futures.
+          Track your net worth, climb the ranks, compare with friends, and
+          forecast your future finances.
         </p>
         <div className="flex flex-wrap justify-center gap-2 text-sm">
-          {["📊 Graphiques", "🔮 Prévisions", "💸 Dépenses", "🏅 Rangs", "🏆 Classement"].map(
+          {["📊 Charts", "🔮 Forecast", "💸 Expenses", "🏅 Ranks", "🏆 Leaderboard"].map(
             (f) => (
               <span key={f} className="card px-3 py-1.5">
                 {f}
@@ -33,10 +33,10 @@ export default async function Home() {
       </div>
       <div className="flex gap-3">
         <Link href="/login" className="btn-primary text-base">
-          Commencer
+          Get started
         </Link>
         <Link href="/login" className="btn-ghost text-base">
-          Se connecter
+          Sign in
         </Link>
       </div>
     </main>

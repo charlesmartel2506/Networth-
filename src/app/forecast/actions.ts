@@ -8,7 +8,7 @@ export async function savePaySettings(formData: FormData) {
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) throw new Error("Non authentifié");
+  if (!user) throw new Error("Not authenticated");
 
   const { error } = await supabase.from("pay_settings").upsert({
     user_id: user.id,

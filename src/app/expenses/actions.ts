@@ -8,7 +8,7 @@ async function requireUser() {
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) throw new Error("Non authentifié");
+  if (!user) throw new Error("Not authenticated");
   return { supabase, user };
 }
 
@@ -16,12 +16,12 @@ export async function addExpense(formData: FormData) {
   const { supabase, user } = await requireUser();
 
   const amount = parseFloat(String(formData.get("amount") || "0")) || 0;
-  if (amount <= 0) throw new Error("Montant invalide");
+  if (amount <= 0) throw new Error("Invalid amount");
 
   const { error } = await supabase.from("expenses").insert({
     user_id: user.id,
     amount,
-    category: String(formData.get("category") || "Autre").trim() || "Autre",
+    category: String(formData.get("category") || "Other").trim() || "Other",
     note: String(formData.get("note") || "").trim() || null,
     spent_at:
       String(formData.get("spent_at") || "") ||

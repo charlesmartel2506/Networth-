@@ -15,9 +15,9 @@ export default async function LoginPage({
           <Link href="/" className="text-3xl">
             💰
           </Link>
-          <h1 className="text-2xl font-bold">Bienvenue sur Networth</h1>
+          <h1 className="text-2xl font-bold">Welcome to Networth</h1>
           <p className="text-sm opacity-70">
-            Connecte-toi ou crée un compte pour commencer.
+            Sign in or create an account to get started.
           </p>
         </div>
 
@@ -28,32 +28,32 @@ export default async function LoginPage({
         )}
         {message === "check-email" && (
           <p className="rounded-lg bg-blue-500/10 text-blue-600 dark:text-blue-400 px-4 py-3 text-sm">
-            Vérifie ta boîte mail pour confirmer ton compte, puis connecte-toi.
+            Check your inbox to confirm your account, then sign in.
           </p>
         )}
 
         <form className="flex flex-col gap-4">
           <label className="flex flex-col gap-1 text-sm">
-            Nom affiché (à l&apos;inscription)
+            Display name (for sign up)
             <input
               name="display_name"
               type="text"
-              placeholder="Ex: Julien"
+              placeholder="e.g. Julien"
               className="input"
             />
           </label>
           <label className="flex flex-col gap-1 text-sm">
-            Courriel
+            Email
             <input
               name="email"
               type="email"
               required
-              placeholder="toi@exemple.com"
+              placeholder="you@example.com"
               className="input"
             />
           </label>
           <label className="flex flex-col gap-1 text-sm">
-            Mot de passe
+            Password
             <input
               name="password"
               type="password"
@@ -66,10 +66,10 @@ export default async function LoginPage({
 
           <div className="flex flex-col gap-2 mt-2">
             <button formAction={login} className="btn-primary">
-              Se connecter
+              Sign in
             </button>
             <button formAction={signup} className="btn-ghost">
-              Créer un compte
+              Create account
             </button>
           </div>
         </form>

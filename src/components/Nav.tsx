@@ -2,11 +2,11 @@ import Link from "next/link";
 import { signOut } from "@/app/login/actions";
 
 const links = [
-  { href: "/dashboard", label: "Tableau de bord", icon: "📊" },
-  { href: "/expenses", label: "Dépenses", icon: "💸" },
-  { href: "/forecast", label: "Prévisions", icon: "🔮" },
-  { href: "/ranks", label: "Rangs", icon: "🏅" },
-  { href: "/leaderboard", label: "Classement", icon: "🏆" },
+  { href: "/dashboard", label: "Dashboard", icon: "📊" },
+  { href: "/expenses", label: "Expenses", icon: "💸" },
+  { href: "/forecast", label: "Forecast", icon: "🔮" },
+  { href: "/ranks", label: "Ranks", icon: "🏅" },
+  { href: "/leaderboard", label: "Leaderboard", icon: "🏆" },
 ];
 
 export default function Nav({ displayName }: { displayName?: string | null }) {
@@ -40,7 +40,7 @@ export default function Nav({ displayName }: { displayName?: string | null }) {
           )}
           <form action={signOut}>
             <button className="text-sm rounded-full border border-border px-3 py-1 hover:bg-surface-2 transition">
-              Quitter
+              Sign out
             </button>
           </form>
         </div>

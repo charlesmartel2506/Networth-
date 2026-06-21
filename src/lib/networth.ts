@@ -8,6 +8,8 @@ export type Entry = {
   amount: string;
   note: string | null;
   recorded_at: string;
+  asset_breakdown: Record<string, number>;
+  liability_breakdown: Record<string, number>;
 };
 
 export type NWData = {
@@ -37,7 +39,9 @@ export async function getNetWorthData(): Promise<NWData> {
 
   const { data: entriesData } = await supabase
     .from("net_worth_entries")
-    .select("id, assets, liabilities, amount, note, recorded_at")
+    .select(
+      "id, assets, liabilities, amount, note, recorded_at, asset_breakdown, liability_breakdown",
+    )
     .eq("user_id", userId)
     .order("recorded_at", { ascending: false })
     .order("created_at", { ascending: false });
