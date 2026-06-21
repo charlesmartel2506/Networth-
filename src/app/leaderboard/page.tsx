@@ -1,5 +1,6 @@
 import Link from "next/link";
 import Nav from "@/components/Nav";
+import RankBadge from "@/components/RankBadge";
 import { createClient } from "@/lib/supabase/server";
 import { formatMoney } from "@/lib/format";
 
@@ -53,7 +54,7 @@ export default async function LeaderboardPage() {
         <h1 className="text-2xl font-bold">Classement 🏆</h1>
 
         {(groups ?? []).length === 0 ? (
-          <div className="rounded-2xl border border-foreground/10 p-6 text-sm opacity-70">
+          <div className="card p-6 text-sm text-muted">
             Tu ne fais partie d&apos;aucun groupe pour l&apos;instant. Crée ou
             rejoins un groupe depuis ton{" "}
             <Link href="/dashboard" className="underline">
@@ -75,26 +76,29 @@ export default async function LeaderboardPage() {
             return (
               <section key={group.id} className="flex flex-col gap-3">
                 <h2 className="font-semibold">{group.name}</h2>
-                <div className="rounded-2xl border border-foreground/10 overflow-hidden">
+                <div className="card overflow-hidden">
                   {ranked.map((row, i) => (
                     <div
                       key={row.userId}
-                      className={`flex items-center justify-between px-4 py-3 text-sm ${
-                        i > 0 ? "border-t border-foreground/10" : ""
-                      } ${row.userId === user!.id ? "bg-foreground/[0.04]" : ""}`}
+                      className={`flex items-center justify-between gap-3 px-4 py-3 text-sm ${
+                        i > 0 ? "border-t border-border" : ""
+                      } ${row.userId === user!.id ? "bg-primary/[0.06]" : ""}`}
                     >
                       <span className="flex items-center gap-3">
-                        <span className="w-6 text-center">
+                        <span className="w-6 text-center text-lg">
                           {medals[i] ?? i + 1}
                         </span>
                         <span className="font-medium">
                           {row.name}
                           {row.userId === user!.id && (
-                            <span className="opacity-50"> (toi)</span>
+                            <span className="text-muted"> (toi)</span>
                           )}
                         </span>
+                        {row.amount !== null && (
+                          <RankBadge amount={row.amount} size="sm" />
+                        )}
                       </span>
-                      <span className="tabular-nums font-medium">
+                      <span className="tabular-nums font-semibold">
                         {row.amount === null ? "—" : formatMoney(row.amount)}
                       </span>
                     </div>

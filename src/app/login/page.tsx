@@ -39,7 +39,7 @@ export default async function LoginPage({
               name="display_name"
               type="text"
               placeholder="Ex: Julien"
-              className="rounded-lg border border-foreground/15 bg-transparent px-3 py-2 outline-none focus:border-foreground/40"
+              className="input"
             />
           </label>
           <label className="flex flex-col gap-1 text-sm">
@@ -49,7 +49,7 @@ export default async function LoginPage({
               type="email"
               required
               placeholder="toi@exemple.com"
-              className="rounded-lg border border-foreground/15 bg-transparent px-3 py-2 outline-none focus:border-foreground/40"
+              className="input"
             />
           </label>
           <label className="flex flex-col gap-1 text-sm">
@@ -60,21 +60,15 @@ export default async function LoginPage({
               required
               minLength={6}
               placeholder="••••••••"
-              className="rounded-lg border border-foreground/15 bg-transparent px-3 py-2 outline-none focus:border-foreground/40"
+              className="input"
             />
           </label>
 
           <div className="flex flex-col gap-2 mt-2">
-            <button
-              formAction={login}
-              className="rounded-full bg-foreground text-background px-5 py-2.5 font-medium hover:opacity-90 transition"
-            >
+            <button formAction={login} className="btn-primary">
               Se connecter
             </button>
-            <button
-              formAction={signup}
-              className="rounded-full border border-foreground/20 px-5 py-2.5 font-medium hover:bg-foreground/5 transition"
-            >
+            <button formAction={signup} className="btn-ghost">
               Créer un compte
             </button>
           </div>

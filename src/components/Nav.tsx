@@ -1,36 +1,46 @@
 import Link from "next/link";
 import { signOut } from "@/app/login/actions";
 
+const links = [
+  { href: "/dashboard", label: "Tableau de bord", icon: "📊" },
+  { href: "/expenses", label: "Dépenses", icon: "💸" },
+  { href: "/forecast", label: "Prévisions", icon: "🔮" },
+  { href: "/ranks", label: "Rangs", icon: "🏅" },
+  { href: "/leaderboard", label: "Classement", icon: "🏆" },
+];
+
 export default function Nav({ displayName }: { displayName?: string | null }) {
   return (
-    <header className="border-b border-foreground/10">
-      <nav className="max-w-4xl mx-auto px-6 h-14 flex items-center justify-between">
-        <div className="flex items-center gap-6">
-          <Link href="/dashboard" className="font-bold flex items-center gap-1">
-            <span>💰</span> Networth
-          </Link>
+    <header className="sticky top-0 z-10 backdrop-blur-md bg-surface/70 border-b border-border">
+      <nav className="max-w-5xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between gap-2">
+        <div className="flex items-center gap-1 sm:gap-2 overflow-x-auto">
           <Link
             href="/dashboard"
-            className="text-sm opacity-70 hover:opacity-100 transition"
+            className="font-bold flex items-center gap-1 pr-2 shrink-0"
           >
-            Tableau de bord
+            <span>💰</span>
+            <span className="gradient-text">Networth</span>
           </Link>
-          <Link
-            href="/leaderboard"
-            className="text-sm opacity-70 hover:opacity-100 transition"
-          >
-            Classement
-          </Link>
+          {links.map((l) => (
+            <Link
+              key={l.href}
+              href={l.href}
+              className="text-sm px-2.5 py-1.5 rounded-lg text-muted hover:text-foreground hover:bg-surface-2 transition whitespace-nowrap"
+            >
+              <span className="sm:hidden">{l.icon}</span>
+              <span className="hidden sm:inline">{l.label}</span>
+            </Link>
+          ))}
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 shrink-0">
           {displayName && (
-            <span className="text-sm opacity-70 hidden sm:inline">
+            <span className="text-sm text-muted hidden md:inline">
               {displayName}
             </span>
           )}
           <form action={signOut}>
-            <button className="text-sm rounded-full border border-foreground/20 px-3 py-1 hover:bg-foreground/5 transition">
-              Déconnexion
+            <button className="text-sm rounded-full border border-border px-3 py-1 hover:bg-surface-2 transition">
+              Quitter
             </button>
           </form>
         </div>

@@ -1,16 +1,12 @@
+import Link from "next/link";
 import Nav from "@/components/Nav";
+import RankBadge from "@/components/RankBadge";
+import { NetWorthAreaChart } from "@/components/Charts";
 import { createClient } from "@/lib/supabase/server";
+import { getNetWorthData, type Entry } from "@/lib/networth";
+import { getRank } from "@/lib/ranks";
 import { formatMoney, formatDate } from "@/lib/format";
 import { addEntry, createGroup, joinGroup } from "./actions";
-
-type Entry = {
-  id: string;
-  assets: string;
-  liabilities: string;
-  amount: string;
-  note: string | null;
-  recorded_at: string;
-};
 
 type Group = {
   id: string;
@@ -19,100 +15,109 @@ type Group = {
   owner_id: string;
 };
 
-// Quelques conseils simples basés sur les données.
-function buildTips(entries: Entry[]): string[] {
+function buildTips(entries: Entry[], estimated: number, expensesSince: number): string[] {
   const tips: string[] = [];
   if (entries.length === 0) {
-    return ["Ajoute ta première entrée pour démarrer le suivi !"];
+    return ["Ajoute ta première valeur nette pour démarrer le suivi !"];
   }
-  const latest = entries[0];
-  const assets = parseFloat(latest.assets);
-  const liabilities = parseFloat(latest.liabilities);
-  const amount = parseFloat(latest.amount);
-
-  if (liabilities > assets * 0.5 && liabilities > 0) {
+  if (expensesSince > 0) {
     tips.push(
-      "Tes dettes représentent une grosse part de tes actifs. Cible le remboursement des dettes à taux d'intérêt élevé en premier.",
+      `Tu as dépensé ${formatMoney(expensesSince)} depuis ta dernière mise à jour. Pense à mettre à jour ta valeur nette.`,
     );
   }
-  if (amount < 0) {
+  if (estimated < 0) {
     tips.push(
-      "Ta valeur nette est négative. Concentre-toi sur la réduction des dettes et la création d'un petit fonds d'urgence.",
+      "Ta valeur nette est négative. Concentre-toi sur la réduction des dettes et un petit fonds d'urgence.",
     );
   }
   if (entries.length >= 2) {
     const prev = parseFloat(entries[1].amount);
-    if (amount > prev) {
+    const cur = parseFloat(entries[0].amount);
+    if (cur > prev)
       tips.push(
-        `Bravo ! Ta valeur nette a augmenté de ${formatMoney(amount - prev)} depuis ta dernière entrée. Continue !`,
+        `Bravo ! +${formatMoney(cur - prev)} depuis ta saisie précédente. Continue !`,
       );
-    } else if (amount < prev) {
-      tips.push(
-        `Ta valeur nette a baissé de ${formatMoney(prev - amount)}. Revois tes dépenses récentes.`,
-      );
-    }
   }
   tips.push(
-    "Vise à épargner/investir au moins 20 % de tes revenus pour faire croître ta valeur nette dans le temps.",
+    "Épargne/investis au moins 20 % de tes revenus pour faire croître ta valeur nette.",
   );
   return tips;
 }
 
 export default async function DashboardPage() {
+  const data = await getNetWorthData();
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("display_name, username")
-    .eq("id", user!.id)
-    .single();
-
-  const { data: entriesData } = await supabase
-    .from("net_worth_entries")
-    .select("id, assets, liabilities, amount, note, recorded_at")
-    .eq("user_id", user!.id)
-    .order("recorded_at", { ascending: false })
-    .order("created_at", { ascending: false });
-
-  const entries = (entriesData ?? []) as Entry[];
-
   const { data: groupsData } = await supabase
     .from("groups")
     .select("id, name, invite_code, owner_id");
   const groups = (groupsData ?? []) as Group[];
 
-  const current = entries[0] ? parseFloat(entries[0].amount) : 0;
-  const tips = buildTips(entries);
+  const rank = getRank(data.estimated);
+  const tips = buildTips(data.entries, data.estimated, data.expensesSince);
   const today = new Date().toISOString().slice(0, 10);
+
+  const chartData = [
+    ...data.entries
+      .slice()
+      .reverse()
+      .map((e) => ({
+        label: formatDate(e.recorded_at).replace(/ \d{4}$/, ""),
+        value: parseFloat(e.amount),
+      })),
+  ];
+  if (data.expensesSince > 0) {
+    chartData.push({ label: "Estimé", value: data.estimated });
+  }
 
   return (
     <>
-      <Nav displayName={profile?.display_name} />
-      <main className="flex-1 max-w-4xl w-full mx-auto px-6 py-8 flex flex-col gap-8">
-        {/* Valeur nette actuelle */}
-        <section className="rounded-2xl border border-foreground/10 p-6 flex flex-col gap-1">
-          <span className="text-sm opacity-60">Ta valeur nette actuelle</span>
-          <span className="text-4xl font-bold tabular-nums">
-            {formatMoney(current)}
-          </span>
-          {entries[0] && (
-            <span className="text-sm opacity-60">
-              au {formatDate(entries[0].recorded_at)}
+      <Nav displayName={data.displayName} />
+      <main className="flex-1 max-w-5xl w-full mx-auto px-4 sm:px-6 py-8 flex flex-col gap-6">
+        {/* En-tête : valeur nette + rang */}
+        <section className="grid md:grid-cols-3 gap-4">
+          <div
+            className="card p-6 md:col-span-2 flex flex-col gap-1 text-white relative overflow-hidden"
+            style={{
+              background: `linear-gradient(135deg, ${rank.color}, var(--primary-2))`,
+            }}
+          >
+            <span className="text-sm opacity-90">Ta valeur nette estimée</span>
+            <span className="text-4xl sm:text-5xl font-bold tabular-nums">
+              {formatMoney(data.estimated)}
             </span>
+            <span className="text-sm opacity-90">
+              {data.snapshotDate
+                ? `Dernière saisie : ${formatMoney(data.snapshot)} au ${formatDate(data.snapshotDate)}`
+                : "Aucune saisie pour l'instant"}
+              {data.expensesSince > 0 &&
+                ` · −${formatMoney(data.expensesSince)} de dépenses`}
+            </span>
+          </div>
+          <div className="card p-6 flex flex-col justify-center gap-3">
+            <RankBadge amount={data.estimated} size="lg" />
+            <Link href="/ranks" className="text-xs text-primary font-medium">
+              Voir tous les rangs →
+            </Link>
+          </div>
+        </section>
+
+        {/* Graphique */}
+        <section className="card p-5">
+          <h2 className="font-semibold mb-2">Évolution de ta valeur nette</h2>
+          {chartData.length > 0 ? (
+            <NetWorthAreaChart data={chartData} color={rank.color} />
+          ) : (
+            <p className="text-sm text-muted py-12 text-center">
+              Ajoute des entrées pour voir ta courbe apparaître.
+            </p>
           )}
         </section>
 
-        <div className="grid md:grid-cols-2 gap-8">
+        <div className="grid md:grid-cols-2 gap-6">
           {/* Ajouter une entrée */}
-          <section className="flex flex-col gap-4">
-            <h2 className="font-semibold">Ajouter une entrée</h2>
-            <form
-              action={addEntry}
-              className="flex flex-col gap-3 rounded-2xl border border-foreground/10 p-5"
-            >
+          <section className="card p-5 flex flex-col gap-3">
+            <h2 className="font-semibold">Mettre à jour ma valeur nette</h2>
+            <form action={addEntry} className="flex flex-col gap-3">
               <label className="flex flex-col gap-1 text-sm">
                 Actifs (épargne, placements, biens…)
                 <input
@@ -122,7 +127,7 @@ export default async function DashboardPage() {
                   min="0"
                   required
                   placeholder="0"
-                  className="rounded-lg border border-foreground/15 bg-transparent px-3 py-2 outline-none focus:border-foreground/40"
+                  className="input"
                 />
               </label>
               <label className="flex flex-col gap-1 text-sm">
@@ -134,41 +139,42 @@ export default async function DashboardPage() {
                   min="0"
                   required
                   placeholder="0"
-                  className="rounded-lg border border-foreground/15 bg-transparent px-3 py-2 outline-none focus:border-foreground/40"
+                  className="input"
                 />
               </label>
-              <label className="flex flex-col gap-1 text-sm">
-                Date
-                <input
-                  name="recorded_at"
-                  type="date"
-                  defaultValue={today}
-                  className="rounded-lg border border-foreground/15 bg-transparent px-3 py-2 outline-none focus:border-foreground/40"
-                />
-              </label>
-              <label className="flex flex-col gap-1 text-sm">
-                Note (optionnel)
-                <input
-                  name="note"
-                  type="text"
-                  placeholder="Ex: après remboursement auto"
-                  className="rounded-lg border border-foreground/15 bg-transparent px-3 py-2 outline-none focus:border-foreground/40"
-                />
-              </label>
-              <button className="mt-1 rounded-full bg-foreground text-background px-5 py-2.5 font-medium hover:opacity-90 transition">
-                Enregistrer
-              </button>
+              <div className="grid grid-cols-2 gap-3">
+                <label className="flex flex-col gap-1 text-sm">
+                  Date
+                  <input
+                    name="recorded_at"
+                    type="date"
+                    defaultValue={today}
+                    className="input"
+                  />
+                </label>
+                <label className="flex flex-col gap-1 text-sm">
+                  Note
+                  <input
+                    name="note"
+                    type="text"
+                    placeholder="Optionnel"
+                    className="input"
+                  />
+                </label>
+              </div>
+              <button className="btn-primary mt-1">Enregistrer</button>
             </form>
           </section>
 
           {/* Conseils */}
-          <section className="flex flex-col gap-4">
-            <h2 className="font-semibold">Conseils pour t&apos;améliorer 💡</h2>
-            <ul className="flex flex-col gap-3">
+          <section className="card p-5 flex flex-col gap-3">
+            <h2 className="font-semibold">Conseils 💡</h2>
+            <ul className="flex flex-col gap-2">
               {tips.map((tip, i) => (
                 <li
                   key={i}
-                  className="rounded-xl border border-foreground/10 bg-foreground/[0.03] px-4 py-3 text-sm"
+                  className="rounded-xl bg-surface-2 px-4 py-3 text-sm border-l-4"
+                  style={{ borderColor: "var(--primary)" }}
                 >
                   {tip}
                 </li>
@@ -178,39 +184,35 @@ export default async function DashboardPage() {
         </div>
 
         {/* Historique */}
-        <section className="flex flex-col gap-4">
+        <section className="card p-5 flex flex-col gap-3">
           <h2 className="font-semibold">Historique</h2>
-          {entries.length === 0 ? (
-            <p className="text-sm opacity-60">Aucune entrée pour l&apos;instant.</p>
+          {data.entries.length === 0 ? (
+            <p className="text-sm text-muted">Aucune entrée pour l&apos;instant.</p>
           ) : (
-            <div className="rounded-2xl border border-foreground/10 overflow-hidden">
+            <div className="overflow-x-auto">
               <table className="w-full text-sm">
-                <thead className="bg-foreground/[0.03] text-left">
+                <thead className="text-left text-muted">
                   <tr>
-                    <th className="px-4 py-2 font-medium">Date</th>
-                    <th className="px-4 py-2 font-medium text-right">Actifs</th>
-                    <th className="px-4 py-2 font-medium text-right">Dettes</th>
-                    <th className="px-4 py-2 font-medium text-right">
-                      Valeur nette
-                    </th>
+                    <th className="px-3 py-2 font-medium">Date</th>
+                    <th className="px-3 py-2 font-medium text-right">Actifs</th>
+                    <th className="px-3 py-2 font-medium text-right">Dettes</th>
+                    <th className="px-3 py-2 font-medium text-right">Valeur nette</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {entries.map((e) => (
-                    <tr key={e.id} className="border-t border-foreground/10">
-                      <td className="px-4 py-2">
+                  {data.entries.map((e) => (
+                    <tr key={e.id} className="border-t border-border">
+                      <td className="px-3 py-2">
                         {formatDate(e.recorded_at)}
-                        {e.note && (
-                          <span className="opacity-50"> — {e.note}</span>
-                        )}
+                        {e.note && <span className="text-muted"> — {e.note}</span>}
                       </td>
-                      <td className="px-4 py-2 text-right tabular-nums">
+                      <td className="px-3 py-2 text-right tabular-nums text-positive">
                         {formatMoney(e.assets)}
                       </td>
-                      <td className="px-4 py-2 text-right tabular-nums">
+                      <td className="px-3 py-2 text-right tabular-nums text-negative">
                         {formatMoney(e.liabilities)}
                       </td>
-                      <td className="px-4 py-2 text-right tabular-nums font-medium">
+                      <td className="px-3 py-2 text-right tabular-nums font-semibold">
                         {formatMoney(e.amount)}
                       </td>
                     </tr>
@@ -222,20 +224,19 @@ export default async function DashboardPage() {
         </section>
 
         {/* Groupes */}
-        <section className="flex flex-col gap-4">
+        <section className="card p-5 flex flex-col gap-3">
           <h2 className="font-semibold">Tes groupes d&apos;amis</h2>
-
           {groups.length > 0 && (
             <div className="flex flex-col gap-2">
               {groups.map((g) => (
                 <div
                   key={g.id}
-                  className="rounded-xl border border-foreground/10 px-4 py-3 flex items-center justify-between text-sm"
+                  className="rounded-xl bg-surface-2 px-4 py-3 flex items-center justify-between text-sm"
                 >
                   <span className="font-medium">{g.name}</span>
-                  <span className="opacity-60">
-                    Code d&apos;invitation :{" "}
-                    <code className="font-mono bg-foreground/10 rounded px-1.5 py-0.5">
+                  <span className="text-muted">
+                    Code :{" "}
+                    <code className="font-mono bg-primary/10 text-primary rounded px-1.5 py-0.5">
                       {g.invite_code}
                     </code>
                   </span>
@@ -243,40 +244,28 @@ export default async function DashboardPage() {
               ))}
             </div>
           )}
-
           <div className="grid sm:grid-cols-2 gap-4">
-            <form
-              action={createGroup}
-              className="flex flex-col gap-3 rounded-2xl border border-foreground/10 p-5"
-            >
+            <form action={createGroup} className="flex flex-col gap-2">
               <span className="text-sm font-medium">Créer un groupe</span>
               <input
                 name="name"
                 type="text"
                 required
-                placeholder="Nom du groupe (ex: Les Amis)"
-                className="rounded-lg border border-foreground/15 bg-transparent px-3 py-2 outline-none focus:border-foreground/40 text-sm"
+                placeholder="Nom du groupe"
+                className="input"
               />
-              <button className="rounded-full bg-foreground text-background px-5 py-2 font-medium hover:opacity-90 transition text-sm">
-                Créer
-              </button>
+              <button className="btn-primary">Créer</button>
             </form>
-
-            <form
-              action={joinGroup}
-              className="flex flex-col gap-3 rounded-2xl border border-foreground/10 p-5"
-            >
+            <form action={joinGroup} className="flex flex-col gap-2">
               <span className="text-sm font-medium">Rejoindre un groupe</span>
               <input
                 name="code"
                 type="text"
                 required
                 placeholder="Code d'invitation"
-                className="rounded-lg border border-foreground/15 bg-transparent px-3 py-2 outline-none focus:border-foreground/40 text-sm uppercase"
+                className="input uppercase"
               />
-              <button className="rounded-full border border-foreground/20 px-5 py-2 font-medium hover:bg-foreground/5 transition text-sm">
-                Rejoindre
-              </button>
+              <button className="btn-ghost">Rejoindre</button>
             </form>
           </div>
         </section>

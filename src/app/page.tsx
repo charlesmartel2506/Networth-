@@ -13,26 +13,29 @@ export default async function Home() {
   return (
     <main className="flex-1 flex flex-col items-center justify-center px-6 text-center gap-8">
       <div className="max-w-xl flex flex-col gap-5">
-        <span className="text-5xl">💰</span>
-        <h1 className="text-4xl sm:text-5xl font-bold tracking-tight">
-          Networth
+        <span className="text-6xl">💰</span>
+        <h1 className="text-4xl sm:text-6xl font-bold tracking-tight">
+          <span className="gradient-text">Networth</span>
         </h1>
-        <p className="text-lg opacity-80">
-          Suis ta valeur nette, compare-toi à tes amis dans un classement, et
-          reçois des conseils pour l&apos;améliorer.
+        <p className="text-lg text-muted">
+          Suis ta valeur nette, grimpe les rangs, compare-toi à tes amis et
+          projette tes finances futures.
         </p>
+        <div className="flex flex-wrap justify-center gap-2 text-sm">
+          {["📊 Graphiques", "🔮 Prévisions", "💸 Dépenses", "🏅 Rangs", "🏆 Classement"].map(
+            (f) => (
+              <span key={f} className="card px-3 py-1.5">
+                {f}
+              </span>
+            ),
+          )}
+        </div>
       </div>
       <div className="flex gap-3">
-        <Link
-          href="/login"
-          className="rounded-full bg-foreground text-background px-6 py-3 font-medium hover:opacity-90 transition"
-        >
+        <Link href="/login" className="btn-primary text-base">
           Commencer
         </Link>
-        <Link
-          href="/login"
-          className="rounded-full border border-foreground/20 px-6 py-3 font-medium hover:bg-foreground/5 transition"
-        >
+        <Link href="/login" className="btn-ghost text-base">
           Se connecter
         </Link>
       </div>
